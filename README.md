@@ -6,6 +6,8 @@ Built with React, JavaScript, Tailwind CSS, Node.js, and Express. MongoDB stores
 
 Start with [PROJECT_EXPLANATION.md](PROJECT_EXPLANATION.md) for a short presentation guide. The `frontend` and `backend` folders contain the current code. [SOURCE_CODE.md](SOURCE_CODE.md) and [SOURCE_FILES.txt](SOURCE_FILES.txt) are an earlier project snapshot and do not include the newer offline changes. Report material is in [COLLEGE_REPORT.md](COLLEGE_REPORT.md).
 
+For cloud hosting, see [DEPLOYMENT.md](DEPLOYMENT.md): Vercel Hobby frontend, Render Free Docker backend, and MongoDB Atlas Free, including the free-plan reminder and email limitations.
+
 ## Features
 
 | Tool                | What it does                                                                                                                        | Login |

@@ -2,11 +2,21 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import mongoose from "mongoose";
 import { handleAction } from "./controllers/serverActions.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 const app = express();
 app.disable("x-powered-by");
+// Render forwards requests through one trusted edge proxy.
+if (process.env.TRUST_PROXY === "1") app.set("trust proxy", 1);
 app.use(helmet());
+app.get("/health", (_req, res) => {
+  const connected = mongoose.connection.readyState === 1;
+  res.status(connected ? 200 : 503).json({
+    status: connected ? "ok" : "unavailable",
+    database: connected ? "connected" : "disconnected",
+  });
+});
 app.use(
   cors({
     origin(origin, callback) {

@@ -7,6 +7,9 @@ const activeJobs = new Set();
 // A one-minute sweep removes abandoned folders by the ten-minute mark.
 const STALE_AFTER = 9 * 60 * 1000;
 const jobNamePattern = /^[a-f0-9-]{36}$/;
+// A free cloud instance should handle one large conversion at a time.
+const requestedJobs = Number(process.env.MAX_ACTIVE_FILE_JOBS || 3);
+const maxActiveJobs = Number.isInteger(requestedJobs) && requestedJobs >= 1 && requestedJobs <= 3 ? requestedJobs : 3;
 export async function initializeFileStorage() {
   // Creates the temporary input and output folders.
   await Promise.all([
@@ -20,7 +23,7 @@ export async function initializeFileStorage() {
 }
 export async function createJob() {
   // Allocates isolated folders for one file job.
-  if (activeJobs.size >= 3) {
+  if (activeJobs.size >= maxActiveJobs) {
     throw httpError(
       503,
       "The file tools are busy. Please try again in a moment.",

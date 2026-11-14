@@ -6,6 +6,7 @@ frontend/public/pdfjs/
 !**/.env.example
 **/*.log
 .DS_Store
+.vercel/
 backend/.runtime/
 backend/uploads/*
 !backend/uploads/.gitkeep

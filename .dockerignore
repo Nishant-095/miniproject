@@ -1,0 +1,13 @@
+.git
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+backend/.runtime
+backend/uploads
+backend/outputs
+frontend
+SOURCE_CODE.md
+*.jpg

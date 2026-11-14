@@ -6,6 +6,8 @@ import { preparePdfAssets } from "./scripts/pdfAssets.mjs";
 await preparePdfAssets();
 
 export default defineConfig({
+  // The shared PDF utility lives in backend/src; use this app's pdf-lib copy.
+  resolve: { dedupe: ["pdf-lib"] },
   plugins: [
     react(),
     VitePWA({
