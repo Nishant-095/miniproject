@@ -1,0 +1,45 @@
+{
+  "name": "utilityhub-backend",
+  "version": "1.4.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.16.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test src/tests/*.test.js",
+    "test:files": "node --test src/tests/files.test.js",
+    "test:auth": "node --test src/tests/auth.test.js",
+    "test:tasks": "node --test src/tests/tasks.test.js",
+    "test:expenses": "node --test src/tests/expenses.test.js",
+    "test:workspace": "node --test src/tests/workspace.test.js"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "0.1.80",
+    "@pdf-lib/fontkit": "^1.1.1",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "docx": "9.15.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^8.1.0",
+    "image-size": "^2.0.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.0",
+    "multer": "^2.0.2",
+    "node-cron": "^4.6.0",
+    "nodemailer": "^10.2.1",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^2.4.5",
+    "pdfjs-dist": "5.4.296",
+    "sharp": "^0.35.5",
+    "yauzl": "^3.2.0"
+  },
+  "devDependencies": {
+    "mailparser": "^3.12.4",
+    "smtp-server": "^3.21.1"
+  }
+}

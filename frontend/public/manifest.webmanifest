@@ -1,0 +1,50 @@
+{
+  "id": "/",
+  "name": "UtilityHub \u2014 All-in-One Daily Utility Website",
+  "short_name": "UtilityHub",
+  "description": "Documents, daily tools, and your personal workspace.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fafaf8",
+  "theme_color": "#635bdf",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "PDF tools",
+      "short_name": "PDF",
+      "url": "/tools/pdf"
+    },
+    {
+      "name": "My tasks",
+      "short_name": "Tasks",
+      "url": "/tasks"
+    },
+    {
+      "name": "Expenses",
+      "short_name": "Expenses",
+      "url": "/expenses"
+    }
+  ]
+}
