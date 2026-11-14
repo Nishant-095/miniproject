@@ -2,6 +2,18 @@
 
 The frontend runs on Vercel Hobby. The Express backend runs in a Docker container on Render Free, with Ghostscript and LibreOffice installed. MongoDB Atlas Free stores accounts, tasks, expenses, notes and notifications.
 
+## Live installation
+
+| Service | Address |
+| --- | --- |
+| Website | [utilityhub-phi.vercel.app](https://utilityhub-phi.vercel.app/) |
+| Backend health | [utilityhub-api-rnnc.onrender.com/health](https://utilityhub-api-rnnc.onrender.com/health) |
+| Source | [Nishant-095/miniproject](https://github.com/Nishant-095/miniproject) |
+
+Deployment checked on 14 November 2026: MongoDB connection, production CORS/preflight, login validation and protected access, PDF merge/order, page extraction, Ghostscript compression, LibreOffice Word-to-PDF, PDF-to-Word with a table and chart image, image resizing, and PDF creation through the live website. These checks used small sample documents; they do not establish a large-file capacity guarantee.
+
+Vercel deploys new pushes to `main`. This Render service uses the public repository URL: after backend changes, open its dashboard and choose **Manual Deploy → Deploy latest commit**. Public-URL services do not auto-deploy without a connected Git provider. See [Render deploys](https://render.com/docs/deploys).
+
 ## 1. MongoDB Atlas
 
 Create a **Free** cluster. Create a password-authenticated database user with the specific `readWrite` role on database `utilityhub`; leave the collection blank. Save the password privately. The application does not need Atlas administrator access.

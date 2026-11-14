@@ -2,6 +2,8 @@
 
 A college mini project with six tools: **PDF tools, document converter, tasks and reminders, expense tracker, sticky notes, and image compressor**.
 
+**Live website:** [utilityhub-phi.vercel.app](https://utilityhub-phi.vercel.app/) · **Backend health:** [utilityhub-api-rnnc.onrender.com/health](https://utilityhub-api-rnnc.onrender.com/health)
+
 Built with React, JavaScript, Tailwind CSS, Node.js, and Express. MongoDB stores private records. A single Express POST handler runs named actions; the frontend uses the browser's built-in `fetch` function. There are no resource-based REST routers or Axios dependency.
 
 Start with [PROJECT_EXPLANATION.md](PROJECT_EXPLANATION.md) for a short presentation guide. The `frontend` and `backend` folders contain the current code. [SOURCE_CODE.md](SOURCE_CODE.md) and [SOURCE_FILES.txt](SOURCE_FILES.txt) are an earlier project snapshot and do not include the newer offline changes. Report material is in [COLLEGE_REPORT.md](COLLEGE_REPORT.md).
