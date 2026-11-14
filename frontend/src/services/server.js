@@ -15,11 +15,12 @@ async function onlineAction(action, fields = {}, options = {}) {
     once: true,
   });
   let timedOut = false;
+  // A sleeping free backend can take about a minute to wake up.
   const timer = setTimeout(() => {
     // Runs this step after a short delay.
     timedOut = true;
     cancel();
-  }, options.timeout || 15000);
+  }, options.timeout || (import.meta.env?.PROD ? 90000 : 15000));
   try {
     const headers = {};
     const token = localStorage.getItem(TOKEN_KEY);
