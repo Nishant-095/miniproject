@@ -2,6 +2,7 @@ import "./styles.css";
 import "./utilities.css";
 import "./pwa.css";
 import "./mint.css";
+import "./dark.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";

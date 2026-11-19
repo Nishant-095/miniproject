@@ -738,62 +738,6 @@ input:focus-visible {
   border-color: var(--border);
 }
 
-/* Dark mode keeps the same teal accent and readable contrast. */
-[data-theme="dark"] .nav-wrap {
-  background: var(--surface);
-}
-[data-theme="dark"] :is(.text-link, .brand-accent) {
-  color: var(--brand-strong);
-}
-[data-theme="dark"] .button {
-  background: #0f8274;
-  color: #fff;
-}
-[data-theme="dark"] .button:hover {
-  background: #117465;
-}
-[data-theme="dark"] :is(.button-outline, .button-white) {
-  background: var(--surface);
-  color: var(--brand-strong);
-  border-color: var(--brand-border);
-}
-[data-theme="dark"] .button-outline:hover {
-  background: var(--accent-soft);
-}
-[data-theme="dark"] :is(.purple, .green) {
-  color: #9cdbbd;
-  background: #254336;
-}
-[data-theme="dark"] .blue {
-  background: #233c52;
-  color: #a9caf2;
-}
-[data-theme="dark"] .orange {
-  background: #453b26;
-  color: #e9ca94;
-}
-[data-theme="dark"] .coral {
-  background: #472e29;
-  color: #efb5a2;
-}
-[data-theme="dark"] :is(.task-tabs button[aria-pressed="true"], .category-tabs button.selected, .expense-chart-tabs button[aria-pressed="true"], .pdf-tabs button[aria-selected="true"], .compression-options label.chosen, .notification-list .unread) {
-  background: var(--accent-soft);
-  color: var(--brand-strong);
-  border-color: var(--brand-border);
-}
-[data-theme="dark"] .task-overdue {
-  color: #f0ad98 !important;
-}
-[data-theme="dark"] .expense-stat-grid .expense-remaining b {
-  color: var(--brand-strong);
-}
-[data-theme="dark"] .expense-stat-grid .expense-negative b {
-  color: #f0ad98;
-}
-[data-theme="dark"] :is(.auth-aside h1, .auth-aside h1 span, .auth-aside p, .auth-aside li) {
-  color: #f0faf6;
-}
-
 @media (max-width: 1180px) {
   .navbar {
     gap: 14px;

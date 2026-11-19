@@ -1,0 +1,193 @@
+/* Neutral surfaces keep the teal accent clear without tinting the whole app. */
+[data-theme="dark"] body {
+  background: var(--page);
+  color: var(--text);
+}
+[data-theme="dark"] .nav-wrap {
+  background: #14181ef5;
+  border-color: #2b333e;
+  backdrop-filter: blur(16px);
+}
+[data-theme="dark"] .home-hero {
+  background: radial-gradient(ellipse at 90% 0, #1b3b4059, transparent 60%), #151b23;
+  border-color: #2c3642;
+}
+[data-theme="dark"] .home-kicker,
+[data-theme="dark"] .eyebrow {
+  color: var(--brand-strong);
+}
+[data-theme="dark"] .home-hero h1 {
+  color: #f3f6fc;
+  font-weight: 550;
+}
+[data-theme="dark"] .home-description {
+  color: #b6c1cf;
+}
+[data-theme="dark"] :is(.home-shortcut, .tool-card, .module-card, .panel, .utility-card, .file-form, .document-tips, .task-board, .task-stats > div, .expense-stat-grid article, .expense-chart-card, .expense-budget-panel, .expense-transactions) {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 3px 15px #00000012;
+}
+[data-theme="dark"] :is(.home-shortcut, .tool-card):hover {
+  background: #202730;
+  border-color: #4c7377;
+}
+[data-theme="dark"] :is(.home-shortcut h2, .tool-card h3, .task-title-line h2, .task-stats b, .expense-stat-grid b, .expense-description b, .expense-row > strong) {
+  color: var(--text);
+}
+[data-theme="dark"] :is(.text-link, .brand-accent, .nav-links > a.active, .nav-links > a:not(.button):hover) {
+  color: var(--brand-strong);
+}
+[data-theme="dark"] .button {
+  background: #64d9c3;
+  color: #102c2a;
+  border-color: transparent;
+  font-weight: 650;
+}
+[data-theme="dark"] .button:hover {
+  background: #88e8d6;
+  color: #102c2a;
+}
+[data-theme="dark"] :is(.button-outline, .button-white) {
+  background: #202832;
+  color: #dbe6ee;
+  border-color: #3b4958;
+  font-weight: 550;
+}
+[data-theme="dark"] :is(.button-outline, .button-white):hover {
+  background: #2a3541;
+  border-color: #577a7b;
+  color: #effffb;
+}
+[data-theme="dark"] :is(.install-app-button, .theme-button, .notification-trigger, .expense-month-picker, .tool-search, .task-search) {
+  background: #1b222b;
+  border-color: #34404d;
+  color: #b8c5d4;
+}
+[data-theme="dark"] :is(.install-app-button, .theme-button, .notification-trigger):hover {
+  background: #27333e;
+  color: var(--brand-strong);
+}
+[data-theme="dark"] :is(input, textarea, select) {
+  color: var(--text);
+  background-color: #151b23;
+  border-color: #3b4655;
+}
+[data-theme="dark"] :is(input, textarea)::placeholder {
+  color: #8997aa;
+}
+[data-theme="dark"] :is(.tool-search, .task-search) input {
+  background: transparent;
+}
+[data-theme="dark"] :is(.pdf-tabs, .expense-chart-tabs, .expense-table-heading, .reminder-settings, .budget-form-note, .file-processing) {
+  background: #1b222c;
+  border-color: var(--border);
+}
+[data-theme="dark"] :is(.task-tabs button[aria-pressed="true"], .category-tabs button.selected, .expense-chart-tabs button[aria-pressed="true"], .pdf-tabs button[aria-selected="true"], .compression-options label.chosen, .notification-list .unread) {
+  background: #233b41;
+  color: #8be8d8;
+  border-color: #3c666b;
+}
+[data-theme="dark"] :is(.task-row:hover, .notification-list a:hover, .file-actions button:hover:not(:disabled)) {
+  background: #202833;
+}
+[data-theme="dark"] .upload-zone {
+  background: #151d27;
+  border-color: #45616b;
+}
+[data-theme="dark"] :is(.upload-zone:hover, .upload-over) {
+  background: #1c3038;
+  border-color: #6bb9b3;
+}
+[data-theme="dark"] .upload-zone > b {
+  color: #93e2d4;
+}
+[data-theme="dark"] .upload-symbol {
+  background: #263e45;
+  color: #91dfd1;
+}
+[data-theme="dark"] .uploaded-files li {
+  background: #1b232e;
+}
+[data-theme="dark"] :is(.purple, .green) {
+  color: #8fe0c8;
+  background: #253c3b;
+}
+[data-theme="dark"] .blue {
+  color: #99c8fb;
+  background: #26394f;
+}
+[data-theme="dark"] .orange {
+  color: #eac48a;
+  background: #3d352a;
+}
+[data-theme="dark"] .coral {
+  color: #efb4a4;
+  background: #423132;
+}
+[data-theme="dark"] .yellow {
+  color: #e7d28e;
+  background: #3a3629;
+}
+[data-theme="dark"] :is(.account-banner, .file-privacy-note) {
+  background: #1b2b32;
+  border-color: #344850;
+}
+[data-theme="dark"] .account-banner b {
+  color: #a0e2d6;
+}
+[data-theme="dark"] .ready-badge {
+  background: #263c42;
+  color: #b7eade;
+}
+[data-theme="dark"] :is(.available-tag, .tool-status, .priority-pill.low) {
+  background: #263a35;
+  color: #a9d9c5;
+}
+[data-theme="dark"] .is-complete .task-check {
+  background: #173b33;
+  color: #9ae6d0;
+  border-color: #65bfaa;
+}
+[data-theme="dark"] .task-check {
+  border-color: #738397;
+}
+[data-theme="dark"] .is-complete .task-title-line h2 {
+  color: #99a6b7;
+}
+[data-theme="dark"] .task-category {
+  background: #26303d;
+  color: #bac6d6;
+}
+[data-theme="dark"] .task-overdue {
+  color: #ffb7a8 !important;
+}
+[data-theme="dark"] .expense-stat-grid .expense-remaining b {
+  color: #8ce6d0;
+}
+[data-theme="dark"] .expense-stat-grid .expense-negative b {
+  color: #ffb7a8;
+}
+[data-theme="dark"] .expense-donut-center b {
+  color: var(--text);
+}
+[data-theme="dark"] .auth-aside {
+  background: linear-gradient(145deg, #1b3b42, #17232f);
+}
+[data-theme="dark"] .auth-aside :is(h1, h1 span, p, li, .back-link, .aside-foot) {
+  color: #e3eef6;
+}
+[data-theme="dark"] .task-dialog::backdrop {
+  background: #03070dc9;
+  backdrop-filter: blur(5px);
+}
+[data-theme="dark"] .note-card :is(h2, p, small) {
+  color: #e7e9ef;
+}
+[data-theme="dark"] .footer {
+  background: #14181e;
+}
+[data-theme="dark"] .pwa-status {
+  background: #1c2530;
+  box-shadow: 0 12px 40px #00000050;
+}

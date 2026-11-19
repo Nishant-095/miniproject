@@ -31,9 +31,10 @@ export default defineConfig({
         "manifest.webmanifest",
         "icons/*.png",
         "icons/icon.svg",
+        "licenses/*",
       ],
       injectManifest: {
-        globPatterns: ["**/*.{js,mjs,css,html,svg,png,ttf,webmanifest,pfb,bcmap,wasm,bin}"],
+        globPatterns: ["**/*.{js,mjs,css,html,svg,png,ttf,woff2,webmanifest,pfb,bcmap,wasm,bin}"],
         globIgnores: ["notification-sw.js"],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
       },

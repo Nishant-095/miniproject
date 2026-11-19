@@ -108,25 +108,8 @@ async function convertDocument(form, options) {
     const { structuredWordPdf } = await import("./structuredWordPdf.js");
     const structured = await structuredWordPdf(file);
     if (structured) return structured;
-    const mammoth = await import("mammoth/mammoth.browser");
-    const engine = mammoth.default || mammoth;
-    const styleMap = ["br[type='page'] => br.uh-page-break"];
-    for (const align of ["left", "center", "right", "both"]) {
-      for (let heading = 0; heading <= 6; heading++) {
-        styleMap.push(`p[style-name='UtilityHub-${align}-${heading}'] => ${heading ? `h${heading}` : "p"}.uh-${align}:fresh`);
-      }
-    }
-    const converted = await engine.convertToHtml({ arrayBuffer: await file.arrayBuffer() }, {
-      externalFileAccess: false, styleMap,
-      transformDocument: engine.transforms.paragraph(paragraph => {
-        if (paragraph.numbering) return paragraph;
-        const align = ["center", "right", "both"].includes(paragraph.alignment) ? paragraph.alignment : "left";
-        const heading = Number(/heading\s*([1-6])/i.exec(paragraph.styleName || paragraph.styleId || "")?.[1] || 0);
-        return { ...paragraph, styleName: `UtilityHub-${align}-${heading}` };
-      }),
-    });
-    const { structuredDocxPdf } = await import("./docxToPdf.js");
-    return structuredDocxPdf(converted.value);
+    const { renderDocxPdf } = await import("./wordLayoutPdf.js");
+    return renderDocxPdf(file, options);
   }
   if (format === "docx" && /\.pdf$/i.test(file.name)) {
     const { structuredPdfToWord } = await import("./structuredPdf.js");

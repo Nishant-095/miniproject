@@ -25,7 +25,7 @@ Tasks, notes, expenses and account details still sync to your authenticated Mong
 | Sticky notes | Private colored notes, pins, search and pagination | Yes |
 | Image compressor | JPG/PNG input, JPEG/PNG/WebP output, quality and resizing | No |
 
-PDF-to-Word preserves source page sizes, positioned editable text, detected tables (including blank cells), images and graphs. Scans remain images; OCR is not performed. Fonts, borderless tables and complex layouts can vary. Browser Word-to-PDF preserves UtilityHub's positioned exports; ordinary Word documents support text, alignment, page breaks, tables and embedded JPG/PNG images, with limitations for advanced Word layouts.
+PDF-to-Word preserves source page sizes, positioned editable text, detected tables (including blank cells), images and graphs. Scans remain images; OCR is not performed. Fonts, borderless tables and complex layouts can vary. Browser Word-to-PDF preserves UtilityHub's positioned exports. Ordinary Word documents use an isolated local page renderer for page sizes, margins, page borders, paragraph rules, spacing, alignment, headers/footers, tables and embedded pictures. Embedded fonts are used when available; local Calibri/Arial/Times-compatible fallback fonts are bundled. Rendered pages include a searchable text layer. Advanced Word features and pagination can still differ from Microsoft Word; native charts and embedded documents are rejected with guidance instead of being silently dropped.
 
 PDF compression keeps text, vectors and page geometry. Levels adjust supported RGB JPEG images; other content uses lossless structural optimization. Masked, CMYK and unsupported images remain unchanged. An already compact PDF is returned unchanged if the result would be larger.
 
@@ -34,7 +34,7 @@ PDF compression keeps text, vectors and page geometry. Levels adjust supported R
 | Part | Libraries |
 | --- | --- |
 | Frontend | React, Vite, JavaScript, Tailwind CSS, React Router, Lucide, Recharts |
-| Local documents | pdf-lib, fontkit, PDF.js, pdf-parse, docx, Mammoth, fflate, browser canvas |
+| Local documents | pdf-lib, fontkit, PDF.js, pdf-parse, docx, docx-preview, html2canvas, fflate, browser canvas |
 | Account API | Node.js, Express, Mongoose, JWT, bcryptjs, Helmet, rate limiting |
 | Reminders | node-cron, Nodemailer |
 | PWA | Web app manifest, Workbox, vite-plugin-pwa |
@@ -80,7 +80,7 @@ For hosting and free-plan limitations, see [DEPLOYMENT.md](DEPLOYMENT.md).
 - At most 1,000 PDF pages, including a merged result; 10 million extracted PDF text characters.
 - TXT and typed text: 100,000 characters, UTF-8 and the bundled font's character set.
 - Images: 40 megapixels each, 60 megapixels combined, 12,000 pixels per side; resize output up to 6,000 pixels. No enlargement; metadata is removed. Transparent pixels become white in JPEG. PNG output is lossless.
-- DOCX archives: at most 100 MB expanded content. Advanced text boxes, unsupported image types and unusually wide/tall tables can require editing in a Word editor first.
+- DOCX archives: at most 100 MB expanded content. Advanced text boxes, native charts, embedded documents, unsupported image types and oversized table cells can require exporting in Word or LibreOffice. External pictures, fonts and templates are never downloaded.
 - Browser memory and processing capacity vary; accepting 1,000 pages is not a guarantee that every device can process every document of that size.
 
 Downloading clears the file form and releases the browser download URL after 60 seconds. A normal page cannot detect whether the browser's Save dialog was completed or cancelled.

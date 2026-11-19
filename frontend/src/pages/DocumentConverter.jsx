@@ -14,7 +14,7 @@ const formats = [
     extensions: ["docx"],
     output: "pdf",
     office: true,
-    help: "Convert Word text, tables and embedded JPG/PNG images on this device. UtilityHub's positioned Word exports keep their page layout; other complex Word layouts may vary.",
+    help: "Keep Word page size, margins, borders, alignment, tables and embedded pictures. The PDF includes a searchable text layer. Advanced Word layouts can still differ; review the result before printing.",
   },
   {
     id: "pdf-docx",
@@ -164,7 +164,7 @@ export default function DocumentConverter() {
                     <strong>{format.title}</strong>
                     <br />
                     {format.id === "pdf-docx" ? "Page structure, editable text, tables and graphics."
-                      : format.office ? "Word conversion with table support."
+                      : format.office ? "Page layout, borders, tables and pictures."
                       : "Created with pdf-lib."}
                   </p>
                 </li>
