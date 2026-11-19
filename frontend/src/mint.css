@@ -196,7 +196,7 @@ input:focus-visible {
 .section-heading {
   margin-bottom: 22px;
 }
-.section-heading h2 {
+.section-heading h2, .section-heading h1 {
   margin: 0 0 5px;
   font-size: 25px;
   font-weight: 550;
@@ -884,7 +884,7 @@ input:focus-visible {
   .tools-section {
     padding-block: 20px 35px;
   }
-  .section-heading h2 {
+  .section-heading h2, .section-heading h1 {
     font-size: 23px;
   }
   .section-count {

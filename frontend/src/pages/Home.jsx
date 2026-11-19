@@ -1,21 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight, CheckCheck, FileText, Search, Wallet, X } from "lucide-react";
+import { ArrowRight, Search, X } from "lucide-react";
 import ToolCard from "../components/ToolCard.jsx";
 import { tools } from "../utils/tools.js";
-import { useAuth } from "../context/AuthContext.jsx";
 import usePageTitle from "../hooks/usePageTitle.js";
 
 const categories = ["All tools", "Documents", "Productivity", "Finance"];
-const shortcuts = [
-  { title: "Documents", description: "Convert, merge, and create files.", icon: FileText, tone: "blue", path: "/tools/pdf" },
-  { title: "Tasks", description: "Plan your day and track progress.", icon: CheckCheck, tone: "coral", path: "/tasks" },
-  { title: "Expenses", description: "Log spending and see summaries.", icon: Wallet, tone: "orange", path: "/expenses" },
-];
 
 export default function Home() {
   usePageTitle("Your everyday toolkit");
-  const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All tools");
   const filteredTools = tools.filter((tool) =>
@@ -25,31 +17,9 @@ export default function Home() {
 
   return (
     <>
-      <section className="home-hero">
-        <div className="shell">
-          <p className="home-kicker">Your everyday toolkit</p>
-          <h1>Documents, tasks, and expenses in one place</h1>
-          <p className="home-description">Pick a tool and get it done. No clutter, no extra tabs.</p>
-          <div className="hero-actions">
-            <Link to={user ? "/dashboard" : "/login"} className="button">Open dashboard</Link>
-            <a href="#tools" className="button button-outline">See all tools</a>
-          </div>
-        </div>
-      </section>
-
-      <section className="home-shortcuts shell" aria-label="Quick access">
-        {shortcuts.map(({ title, description, icon: Icon, tone, path }) => (
-          <Link className="home-shortcut" to={path} key={title}>
-            <span className={`tool-icon ${tone}`}><Icon size={23} aria-hidden="true" /></span>
-            <h2>{title}</h2>
-            <p>{description}</p>
-          </Link>
-        ))}
-      </section>
-
       <section id="tools" className="tools-section shell">
         <div className="section-heading">
-          <div><h2>All your tools</h2><p>A few useful things to make your day easier.</p></div>
+          <div><h1>All your tools</h1><p>A few useful things to make your day easier.</p></div>
           <span className="section-count">{tools.length} everyday essentials</span>
         </div>
         <div className="tool-controls">
