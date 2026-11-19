@@ -114,6 +114,12 @@
 .footer-links {
   flex-wrap: wrap;
 }
+.file-privacy-note { display: flex; align-items: center; gap: 9px; color: var(--text-secondary); background: var(--surface-soft); padding: 13px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; line-height: 1.7; margin: 18px 0 24px; }
+.file-privacy-note svg { flex-shrink: 0; color: var(--brand); }
+.app-version { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.app-update-link { display: inline-flex; align-items: center; gap: 5px; background: none; border: 0; color: var(--brand); font: inherit; padding: 0; cursor: pointer; }
+.app-update-link:disabled { opacity: .6; cursor: default; }
+.app-update-button { border-color: var(--brand); color: var(--brand); }
 @media (max-width: 580px) {
   .nav-utilities .install-app-button {
     padding: 9px;

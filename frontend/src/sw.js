@@ -6,11 +6,16 @@ import {
 } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
 import { isAppPath, reminderTarget } from "./utils/pwaPolicy.js";
+import { APP_VERSION, APP_BUILD } from "./utils/version.js";
 setCacheNameDetails({
   prefix: "utilityhub",
 });
 // Vite fills this list with the built interface and every lazy tool bundle.
 // There is deliberately no runtime caching of API responses or user files.
+// Including the release changes the worker for every deployment.
+self.addEventListener("message", event => {
+  if (event.data?.type === "APP_VERSION") event.ports[0]?.postMessage({ version: APP_VERSION, build: APP_BUILD });
+});
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 clientsClaim();

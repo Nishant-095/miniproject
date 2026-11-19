@@ -1,13 +1,11 @@
 import mongoose from "mongoose";
 import rateLimit from "express-rate-limit";
 import { protect } from "../middleware/authMiddleware.js";
-import { prepareFileJob, uploadFiles } from "../middleware/uploadMiddleware.js";
 import { getMe, login, register } from "./authController.js";
 import * as tasks from "./taskController.js";
 import * as notes from "./noteController.js";
 import * as expenses from "./expenseController.js";
 import * as notifications from "./notificationController.js";
-import * as files from "./fileController.js";
 import Task from "../models/Task.js";
 import Note from "../models/Note.js";
 import Expense from "../models/Expense.js";
@@ -23,26 +21,6 @@ const signInLimit = rateLimit({
     message: "Too many sign-in attempts. Please try again in 15 minutes.",
   },
 });
-const fileLimit = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 60,
-  standardHeaders: "draft-7",
-  legacyHeaders: false,
-  message: {
-    message: "Too many file operations. Please try again in 15 minutes.",
-  },
-});
-const pdf = uploadFiles([".pdf"]);
-const pdfs = uploadFiles([".pdf"], true);
-const images = uploadFiles([".jpg", ".jpeg", ".png"], true);
-const document = uploadFiles([
-  ".docx",
-  ".pdf",
-  ".txt",
-  ".jpg",
-  ".jpeg",
-  ".png",
-]);
 
 // Every React request names an action. The functions below handle the work.
 // Private actions always check the signed-in account before accessing MongoDB.
@@ -96,19 +74,7 @@ const actions = {
   createNote: [protect, notes.createNote],
   updateNote: [protect, notes.updateNote],
   deleteNote: [protect, notes.deleteNote],
-  programStatus: [files.status],
-  compressPdf: [fileLimit, prepareFileJob, pdf, files.compress],
-  mergePdfs: [fileLimit, prepareFileJob, pdfs, files.merge],
-  splitPdf: [fileLimit, prepareFileJob, pdf, files.split],
-  imagesToPdf: [fileLimit, prepareFileJob, images, files.makeFromImages],
-  textToPdf: [fileLimit, prepareFileJob, files.makeFromText],
-  convertDocument: [fileLimit, prepareFileJob, document, files.convert],
-  processImage: [
-    fileLimit,
-    prepareFileJob,
-    uploadFiles([".jpg", ".jpeg", ".png"]),
-    files.image,
-  ],
+  programStatus: [(_req, res) => res.json({ fileProcessing: "client", uploads: false })],
 };
 export function handleAction(req, res, next) {
   // Selects a named action and runs its checks.

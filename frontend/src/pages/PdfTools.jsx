@@ -16,7 +16,7 @@ import FilePicker from "../components/FilePicker.jsx";
 import FileResult from "../components/FileResult.jsx";
 import useFileTool from "../hooks/useFileTool.js";
 import usePageTitle from "../hooks/usePageTitle.js";
-import useProgramStatus from "../hooks/useProgramStatus.js";
+import FilePrivacy from "../components/FilePrivacy.jsx";
 import { fileForm, MAX_PDF_PAGES } from "../utils/files.js";
 const modes = [
   {
@@ -47,7 +47,7 @@ const modes = [
 ];
 const tips = {
   compress: [
-    "Low keeps more image detail. High makes image-heavy PDFs smaller.",
+    "Low keeps more JPEG detail. High compresses supported embedded RGB JPEG images more strongly.",
     "Some PDFs are already optimized. If processing makes the file larger, you receive the original.",
     "Compression can change image quality and document metadata. Keep your original copy.",
   ],
@@ -95,7 +95,7 @@ function FormShell({ title, description, tool, children, onSubmit, button }) {
     </form>
   );
 }
-function CompressForm({ status }) {
+function CompressForm() {
   // Displays the PDF compression form.
   const [files, setFiles] = useState([]);
   const [level, setLevel] = useState("medium");
@@ -119,7 +119,7 @@ function CompressForm({ status }) {
   return (
     <FormShell
       title="A smaller PDF. A little less hassle."
-      description="Choose a file and compression level. Offline compression optimizes PDF structure and may save less space; levels apply online."
+      description="Compress locally while preserving text and page layout. Levels adjust supported JPEG images; other content uses lossless structural optimization."
       tool={tool}
       onSubmit={submit}
       button="Compress PDF"
@@ -174,12 +174,6 @@ function CompressForm({ status }) {
           ))}
         </div>
       </fieldset>
-      {status?.ghostscript === false && (
-        <p className="dependency-note">
-          Ghostscript is not available on the backend. Install it or check
-          GHOSTSCRIPT_BIN in backend/.env.
-        </p>
-      )}
     </FormShell>
   );
 }
@@ -381,7 +375,6 @@ export default function PdfTools() {
   )
     ? requested
     : "compress";
-  const status = useProgramStatus();
   function select(id) {
     // Switches the active PDF tool.
     setParams(
@@ -426,6 +419,7 @@ export default function PdfTools() {
           Document converter <ArrowRight size={16} />
         </Link>
       </div>
+      <FilePrivacy />
       <div className="pdf-tabs" role="tablist" aria-label="PDF tools">
         {modes.map(({ id, title, icon: Icon }, index) => (
           // Builds a value for each item.
@@ -461,7 +455,7 @@ export default function PdfTools() {
               aria-labelledby={`pdf-tab-${id}`}
               hidden={active !== id}
             >
-              {id === "compress" && <CompressForm status={status} />}
+              {id === "compress" && <CompressForm />}
               {id === "merge" && <MergeForm />}
               {id === "split" && <SplitForm />}
               {id === "images" && <ImagesForm />}
@@ -487,11 +481,11 @@ export default function PdfTools() {
           </div>
           <div className="document-privacy">
             <ShieldCheck size={23} />
-            <h3>Just passing through.</h3>
+            <h3>Your files stay yours.</h3>
             <p>
-              Uploads are removed after processing. Results are removed after
-              the download response. Abandoned files are cleaned within 10
-              minutes.
+              PDFs and images are read in this browser. Files and extracted text
+              are never sent to our backend. Download your result to keep it;
+              your original file stays unchanged.
             </p>
             <span>
               <LockKeyhole size={12} /> No account required

@@ -4,7 +4,7 @@ import {
   ArrowUp,
   FileText,
   GripVertical,
-  UploadCloud,
+  FolderOpen,
   X,
 } from "lucide-react";
 import {
@@ -107,7 +107,7 @@ export default function FilePicker({
         }}
       >
         <span className="upload-symbol">
-          <UploadCloud size={27} />
+          <FolderOpen size={27} />
         </span>
         <b>
           {files.length && multiple

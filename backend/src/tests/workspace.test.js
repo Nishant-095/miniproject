@@ -34,31 +34,6 @@ async function request(action, { body, as = token } = {}) {
   };
 }
 
-async function upload(
-  bytes,
-  fields = {},
-  name = "sample.png",
-  type = "image/png",
-) {
-  const data = new FormData();
-  data.set(
-    "file",
-    new Blob([bytes], {
-      type,
-    }),
-    name,
-  );
-  for (const [key, value] of Object.entries(fields)) data.set(key, value);
-  const response = await fetch(base + "?action=processImage", {
-    method: "POST",
-    body: data,
-  });
-  return {
-    status: response.status,
-    headers: response.headers,
-    bytes: Buffer.from(await response.arrayBuffer()),
-  };
-}
 before(async () => {
   await mongoose.connect(
     process.env.TEST_MONGO_URI || "mongodb://127.0.0.1:27017",
@@ -393,97 +368,7 @@ test("notes are paginated, pinned first, safely searched, editable, and removabl
   const recent = (await request("recentActivity")).data.activities;
   assert.equal(recent[0].action, "note_deleted");
 });
-test("image API returns real JPEG/WebP/PNG files at bounded aspect-preserving dimensions", async () => {
-  for (const format of ["jpeg", "webp", "png"]) {
-    const result = await upload(image, {
-      format,
-      quality: "60",
-      width: "200",
-      height: "200",
-    });
-    assert.equal(result.status, 200, result.bytes.toString());
-    const metadata = await sharp(result.bytes).metadata();
-    assert.equal(metadata.format, format);
-    assert.equal(metadata.width, 200);
-    assert.equal(metadata.height, 100);
-    assert.equal(result.headers.get("x-image-width"), "200");
-    assert.equal(result.headers.get("x-original-size"), String(image.length));
-    assert.equal(
-      result.headers.get("x-compressed-size"),
-      String(result.bytes.length),
-    );
-    assert.equal(result.headers.get("cache-control"), "no-store");
-    if (format === "jpeg") assert.equal(metadata.hasAlpha, false);
-  }
-  const noEnlarge = await upload(image, {
-    width: "1000",
-  });
-  assert.equal((await sharp(noEnlarge.bytes).metadata()).width, 800);
-});
-test("image processing honors EXIF orientation and strips metadata", async () => {
-  const jpeg = await sharp(image)
-    .jpeg()
-    .withMetadata({
-      orientation: 6,
-    })
-    .toBuffer();
-  const result = await upload(
-    jpeg,
-    {
-      format: "jpeg",
-      width: "100",
-    },
-    "camera.jpg",
-    "image/jpeg",
-  );
-  assert.equal(result.status, 200);
-  const metadata = await sharp(result.bytes).metadata();
-  assert.equal(metadata.width, 100);
-  assert.equal(metadata.height, 200);
-  assert.equal(metadata.orientation, undefined);
-  assert.equal(metadata.exif, undefined);
-});
-test("image endpoint rejects spoofed files and invalid fields without using up job slots", async () => {
-  assert.equal((await upload(Buffer.from("not an image"))).status, 415);
-  for (const fields of [
-    {
-      width: "0",
-    },
-    {
-      width: "6001",
-    },
-    {
-      height: "1.5",
-    },
-    {
-      quality: "101",
-    },
-    {
-      quality: "abc",
-    },
-    {
-      format: "svg",
-    },
-  ])
-    assert.equal((await upload(image, fields)).status, 400);
-  assert.equal(
-    (
-      await upload(image, {
-        width: "10",
-      })
-    ).status,
-    200,
-  );
-  const largeImage = Buffer.alloc(80 * 1024 * 1024);
-  image.copy(largeImage);
-  const acceptedLarge = await upload(largeImage, {
-    width: "10",
-  });
-  assert.equal(acceptedLarge.status, 200, acceptedLarge.bytes.toString());
-  assert.equal((await sharp(acceptedLarge.bytes).metadata()).width, 10);
-  assert.equal((await upload(Buffer.alloc(80 * 1024 * 1024 + 1))).status, 413);
-});
-test("image job folders are removed after the output has been used", async () => {
+test("legacy image regression helper removes its temporary folders", async () => {
   const job = await createJob();
   try {
     const source = path.join(job.inputDir, "source.png");

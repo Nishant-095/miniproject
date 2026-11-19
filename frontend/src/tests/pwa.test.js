@@ -122,6 +122,44 @@ test("declined installation stays uninstalled and registration/update errors are
     env.restore();
   }
 });
+test("startup finds an already waiting worker and focus/reconnect checks for new releases", async () => {
+  const env = globals();
+  try {
+    const pwa = await manager();
+    env.navigator.serviceWorker.controller = {};
+    const worker = new EventTarget();
+    worker.active = { scriptURL: "https://utilityhub.example/sw.js" };
+    worker.waiting = {};
+    let checks = 0, callbacks;
+    worker.update = async () => { checks++; };
+    await pwa.registerPwa({ production: true, registerWorker: options => { callbacks = options; return async () => {}; } });
+    callbacks.onRegisteredSW("/sw.js", worker);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    assert.equal(checks, 1, "An installed app checks at startup, without waiting for focus.");
+    assert.equal(pwa.getPwaState().updateAvailable, true);
+    env.window.dispatchEvent(new Event("focus"));
+    assert.equal(checks, 1, "Rapid focus changes are throttled.");
+    env.window.dispatchEvent(new Event("online"));
+    await new Promise(resolve => setTimeout(resolve, 0));
+    assert.equal(checks, 2, "Reconnecting checks even if the app was just focused.");
+    assert.equal(await pwa.checkForPwaUpdate({ force: true }), true);
+    assert.equal(checks, 3, "The visible check button can request a fresh check.");
+  } finally { env.restore(); }
+});
+test("an update cannot interrupt a running local file conversion", async () => {
+  const env = globals();
+  try {
+    const pwa = await manager(); let applied = 0;
+    await pwa.registerPwa({ production: true, registerWorker: () => async () => { applied++; } });
+    pwa.fileProcessing(true);
+    assert.equal(await pwa.applyPwaUpdate(), false);
+    assert.equal(applied, 0);
+    assert.match(pwa.getPwaState().error, /still processing/);
+    pwa.fileProcessing(false);
+    assert.equal(await pwa.applyPwaUpdate(), true);
+    assert.equal(applied, 1);
+  } finally { env.restore(); }
+});
 test("development and insecure contexts do not register a PWA worker", async () => {
   const env = globals();
   try {

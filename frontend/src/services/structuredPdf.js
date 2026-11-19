@@ -1,6 +1,6 @@
 import { analyzePdfStructure, buildStructuredWord, wordTextMeasure } from "../../../backend/src/utils/pdfStructure.js";
 
-// The same structure analysis runs in the server and the installed offline PWA.
+// Shared structure analysis is bundled into the website and installed PWA.
 export async function structuredPdfToWord(file, options = {}) {
   const pdfjs = await import("pdfjs-dist/build/pdf.mjs");
   pdfjs.GlobalWorkerOptions.workerSrc = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;

@@ -2,6 +2,9 @@ let installPrompt = null;
 let updateWorker = null;
 let started = false;
 let registration = null;
+let activeFileTools = 0;
+let lastCheck = 0;
+let updateCheck = null;
 const listeners = new Set();
 let state = {
   available: false,
@@ -14,6 +17,8 @@ let state = {
   syncPending: false,
   syncError: "",
   workspaceReady: false,
+  checking: false,
+  checkMessage: "",
 };
 function change(values) {
   // Updates and publishes the shared app status.
@@ -35,6 +40,30 @@ export function subscribePwa(listener) {
   return () =>
     // Runs the returned operation when called.
     listeners.delete(listener);
+}
+
+export function fileProcessing(active) {
+  activeFileTools = Math.max(0, activeFileTools + (active ? 1 : -1));
+}
+
+export async function checkForPwaUpdate({ force = false } = {}) {
+  if (!registration || navigator.onLine === false) return false;
+  if (updateCheck) return updateCheck;
+  if (!force && Date.now() - lastCheck < 60000) return false;
+  lastCheck = Date.now();
+  change({ checking: true, checkMessage: "" });
+  updateCheck = (async () => {
+    try {
+      await registration.update();
+      if (registration.waiting && navigator.serviceWorker.controller) change({ updateAvailable: true });
+      change({ checkMessage: state.updateAvailable ? "An update is ready." : registration.installing ? "Downloading the latest app. Keep this window open." : "You have the latest available app." });
+      return true;
+    } catch {
+      change({ checkMessage: "Could not check for updates. Try again while connected." });
+      return false;
+    } finally { change({ checking: false }); updateCheck = null; }
+  })();
+  return updateCheck;
 }
 function installedMode() {
   // Checks whether the app runs in standalone mode.
@@ -119,6 +148,15 @@ export async function registerPwa({
       onRegisteredSW(_url, worker) {
         // Remembers the registered app service worker.
         registration = worker;
+        if (worker?.waiting && navigator.serviceWorker.controller) change({ updateAvailable: true });
+        // Workbox can classify a quick second release as an external install.
+        // Watch waiting workers directly as well so the update stays visible.
+        worker?.addEventListener?.("updatefound", () => {
+          const installing = worker.installing;
+          installing?.addEventListener("statechange", () => {
+            if (installing.state === "installed" && navigator.serviceWorker.controller) change({ updateAvailable: true, error: "" });
+          });
+        });
         if (
           worker?.active?.scriptURL &&
           new URL(worker.active.scriptURL).pathname === "/sw.js"
@@ -126,6 +164,7 @@ export async function registerPwa({
           change({
             ready: true,
           });
+        void checkForPwaUpdate({ force: true });
       },
       onRegisterError() {
         // Reports an interface cache setup failure.
@@ -135,20 +174,14 @@ export async function registerPwa({
         });
       },
     });
-    let lastCheck = 0;
     window.addEventListener("focus", () => {
-      // Handles focus events.
-      if (
-        registration &&
-        navigator.onLine !== false &&
-        Date.now() - lastCheck > 60000
-      ) {
-        lastCheck = Date.now();
-        void registration.update().catch(() => {
-          // Handles a failed operation.
-        });
-      }
+      void checkForPwaUpdate();
     });
+    window.addEventListener("online", () => { void checkForPwaUpdate({ force: true }); });
+    if (typeof document !== "undefined") document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") void checkForPwaUpdate();
+    });
+    window.setInterval?.(() => { void checkForPwaUpdate(); }, 5 * 60 * 1000);
   } catch {
     change({
       error:
@@ -171,6 +204,10 @@ export async function promptInstall() {
 export async function applyPwaUpdate() {
   // Activates the update after the user's choice.
   if (!updateWorker || !state.online) return false;
+  if (activeFileTools) {
+    change({ error: "A file is still processing. Wait for it to finish and download the result before updating." });
+    return false;
+  }
   try {
     await updateWorker(true);
     return true;

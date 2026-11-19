@@ -1,6 +1,7 @@
 import { PDFDocument, PageSizes, rgb } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { MAX_PDF_PAGES } from "../utils/files.js";
+import { validateLocalFiles } from "./localFilePolicy.js";
 
 const pdfType = "application/pdf";
 const result = (data, headers = {}) => ({ data, headers });
@@ -80,16 +81,19 @@ async function imageResult(form) {
   try {
     if (bitmap.width * bitmap.height > 40000000) throw new Error("Use an image smaller than 40 megapixels.");
     const widthInput = form.get("width"), heightInput = form.get("height");
-    const maxW = Number(widthInput) || bitmap.width, maxH = Number(heightInput) || bitmap.height;
-    if ((widthInput && (maxW < 1 || maxW > 6000)) || (heightInput && (maxH < 1 || maxH > 6000))) throw new Error("Dimensions must be between 1 and 6000 pixels.");
+    const maxW = widthInput ? Number(widthInput) : bitmap.width, maxH = heightInput ? Number(heightInput) : bitmap.height;
+    if ((widthInput && (!Number.isInteger(maxW) || maxW < 1 || maxW > 6000)) || (heightInput && (!Number.isInteger(maxH) || maxH < 1 || maxH > 6000))) throw new Error("Dimensions must be whole numbers between 1 and 6000 pixels.");
     const scale = Math.min(1, maxW / bitmap.width, maxH / bitmap.height);
     const canvas = document.createElement("canvas");
     canvas.width = Math.max(1, Math.round(bitmap.width * scale)); canvas.height = Math.max(1, Math.round(bitmap.height * scale));
     const context = canvas.getContext("2d");
     const format = String(form.get("format") || "jpeg");
+    const quality = Number(form.get("quality") || 80);
+    if (!["jpeg", "png", "webp"].includes(format)) throw new Error("Choose JPEG, PNG or WebP output.");
+    if (!Number.isFinite(quality) || quality < 10 || quality > 100) throw new Error("Choose image quality between 10 and 100.");
     if (format === "jpeg") { context.fillStyle = "white"; context.fillRect(0, 0, canvas.width, canvas.height); }
     context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, `image/${format}`, Number(form.get("quality") || 80) / 100));
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, `image/${format}`, quality / 100));
     if (!blob || blob.type !== `image/${format}`) throw new Error("This browser cannot create the selected image format.");
     return result(blob, { "x-original-size": String(file.size), "x-compressed-size": String(blob.size), "x-saved-percent": String((1 - blob.size / file.size) * 100), "x-image-width": String(canvas.width), "x-image-height": String(canvas.height) });
   } finally { bitmap.close(); }
@@ -105,7 +109,22 @@ async function convertDocument(form, options) {
     const structured = await structuredWordPdf(file);
     if (structured) return structured;
     const mammoth = await import("mammoth/mammoth.browser");
-    const converted = await mammoth.convertToHtml({ arrayBuffer: await file.arrayBuffer() });
+    const engine = mammoth.default || mammoth;
+    const styleMap = ["br[type='page'] => br.uh-page-break"];
+    for (const align of ["left", "center", "right", "both"]) {
+      for (let heading = 0; heading <= 6; heading++) {
+        styleMap.push(`p[style-name='UtilityHub-${align}-${heading}'] => ${heading ? `h${heading}` : "p"}.uh-${align}:fresh`);
+      }
+    }
+    const converted = await engine.convertToHtml({ arrayBuffer: await file.arrayBuffer() }, {
+      externalFileAccess: false, styleMap,
+      transformDocument: engine.transforms.paragraph(paragraph => {
+        if (paragraph.numbering) return paragraph;
+        const align = ["center", "right", "both"].includes(paragraph.alignment) ? paragraph.alignment : "left";
+        const heading = Number(/heading\s*([1-6])/i.exec(paragraph.styleName || paragraph.styleId || "")?.[1] || 0);
+        return { ...paragraph, styleName: `UtilityHub-${align}-${heading}` };
+      }),
+    });
     const { structuredDocxPdf } = await import("./docxToPdf.js");
     return structuredDocxPdf(converted.value);
   }
@@ -117,7 +136,10 @@ async function convertDocument(form, options) {
   throw new Error("This conversion is not supported.");
 }
 
-export async function processOfflineFile(action, payload, options = {}) {
+export async function processLocalFile(action, payload, options = {}) {
+  if (options.signal?.aborted) throw new DOMException("Request cancelled", "AbortError");
+  await validateLocalFiles(action, payload);
+  if (options.signal?.aborted) throw new DOMException("Request cancelled", "AbortError");
   if (action === "processImage") return imageResult(payload);
   if (action === "textToPdf") return result(await textPdf(payload.text));
   if (action === "convertDocument") return result(await convertDocument(payload, options));
@@ -135,13 +157,17 @@ export async function processOfflineFile(action, payload, options = {}) {
     return result(pdfBlob(await output.save()));
   }
   if (action === "compressPdf") {
-    const file = payload.get("file"), doc = await readPdf(file), bytes = await doc.save({ useObjectStreams: true });
+    const file = payload.get("file"), doc = await readPdf(file);
+    const { compressLocalPdf } = await import("./compressLocalPdf.js");
+    const bytes = await compressLocalPdf(doc, payload.get("level") || "medium", options);
     const unchanged = bytes.length >= file.size;
     const blob = unchanged ? file : pdfBlob(bytes);
     return result(blob, { "x-original-size": String(file.size), "x-compressed-size": String(blob.size), "x-saved-percent": String((1 - blob.size / file.size) * 100), "x-compression-result": unchanged ? "unchanged" : "compressed" });
   }
-  throw new Error("This file tool is not available offline.");
+  throw new Error("This file tool is not supported.");
 }
+
+export const processOfflineFile = processLocalFile;
 
 export async function exportOfflineExpenses(rows, month, format) {
   const columns = ["Date", "Category", "Amount (INR)", "Payment method", "Note"];

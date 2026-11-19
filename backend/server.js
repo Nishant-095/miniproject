@@ -4,7 +4,6 @@ import app from "./src/app.js";
 import connectDB from "./src/config/db.js";
 import { startBudgetAlertScheduler } from "./src/services/budgetAlertService.js";
 import { startReminderScheduler } from "./src/services/reminderService.js";
-import { startFileCleanup } from "./src/services/tempFileService.js";
 const port = Number(process.env.PORT || 5000);
 async function startServer() {
   // Checks settings and starts the database and server.
@@ -21,7 +20,6 @@ async function startServer() {
     );
   }
   await connectDB();
-  const stopFileCleanup = await startFileCleanup();
   const stopReminders = startReminderScheduler();
   const stopBudgetAlerts = startBudgetAlertScheduler();
   const server = app.listen(port, () => {
@@ -31,7 +29,6 @@ async function startServer() {
   server.on("error", async (error) => {
     // Handles error events.
     console.error("Could not start the API:", error.message);
-    stopFileCleanup();
     stopReminders();
     stopBudgetAlerts();
     await mongoose.disconnect();
@@ -39,7 +36,6 @@ async function startServer() {
   });
   function shutdown() {
     // Stops the server, schedulers, and database connection.
-    stopFileCleanup();
     stopReminders();
     stopBudgetAlerts();
     server.close(async () => {

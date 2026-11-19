@@ -15,7 +15,7 @@ export default function FileResult({ tool, label = "document" }) {
           <b>Processing your {label}…</b>
         </div>
         <progress aria-label={`Processing ${label}`} />
-        <p>Large documents may take several minutes. Keep this page open.</p>
+        <p>Processing on your device. Large documents may take several minutes. Keep this page open.</p>
       </div>
     );
   if (tool.error)
@@ -38,6 +38,7 @@ export default function FileResult({ tool, label = "document" }) {
           </p>
         </div>
       </div>
+      <p className="compression-note">Created on your device. No file was uploaded.</p>
       {result.stats && (
         <>
           <div className="compression-stats">

@@ -5,6 +5,7 @@ import rateLimit from "express-rate-limit";
 import mongoose from "mongoose";
 import { handleAction } from "./controllers/serverActions.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+import { rejectFileUploads } from "./middleware/filePrivacy.js";
 const app = express();
 app.disable("x-powered-by");
 // Render forwards requests through one trusted edge proxy.
@@ -51,9 +52,6 @@ app.use(
 const normalFields = express.json({
   limit: "100kb",
 });
-const textFields = express.json({
-  limit: "512kb",
-});
 app.use(
   "/server",
   rateLimit({
@@ -68,11 +66,8 @@ app.use(
 );
 app.post(
   "/server",
-  (req, res, next) => {
-    // Chooses the JSON size limit for this action.
-    const parse = req.query.action === "textToPdf" ? textFields : normalFields;
-    parse(req, res, next);
-  },
+  rejectFileUploads,
+  normalFields,
   handleAction,
 );
 app.use(notFound);

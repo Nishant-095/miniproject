@@ -19,7 +19,7 @@ export async function structuredDocxPdf(html) {
     page = pdf.addPage(PageSizes.A4); y = page.getHeight() - margin;
   }
   nextPage();
-  function lines(value, width) {
+  function lines(value, width, size = fontSize) {
     const text = value.replace(/\r/g, "").replace(/\t/g, "    ");
     for (const character of text) if (character !== "\n" && !charset.has(character.codePointAt(0))) throw new Error(`The offline PDF font cannot display: ${character}`);
     const result = [];
@@ -28,11 +28,11 @@ export async function structuredDocxPdf(html) {
       for (const word of paragraph.split(/\s+/)) {
         if (!word) continue;
         const candidate = line ? `${line} ${word}` : word;
-        if (font.widthOfTextAtSize(candidate, fontSize) <= width) { line = candidate; continue; }
+        if (font.widthOfTextAtSize(candidate, size) <= width) { line = candidate; continue; }
         if (line) result.push(line);
         line = "";
         for (const character of word) {
-          if (line && font.widthOfTextAtSize(line + character, fontSize) > width) { result.push(line); line = ""; }
+          if (line && font.widthOfTextAtSize(line + character, size) > width) { result.push(line); line = ""; }
           line += character;
         }
       }
@@ -42,7 +42,7 @@ export async function structuredDocxPdf(html) {
   }
   function inlineText(node) {
     if (node.nodeType === 3) return node.textContent;
-    if (node.nodeName === "BR") return "\n";
+    if (node.nodeName === "BR") return node.classList.contains("uh-page-break") ? "\f" : "\n";
     if (node.nodeName === "IMG") return "";
     const value = [...node.childNodes].map(inlineText).join("");
     return ["P", "LI"].includes(node.nodeName) ? `${value}\n` : value;
@@ -51,7 +51,7 @@ export async function structuredDocxPdf(html) {
     const result = [];
     for (const element of node.querySelectorAll("img")) {
       const match = element.getAttribute("src")?.match(/^data:image\/(png|jpeg);base64,([A-Za-z0-9+/=\s]+)$/);
-      if (!match) throw new Error("An embedded image uses a format the offline converter cannot preserve. Convert this document online.");
+      if (!match) throw new Error("An embedded image uses an unsupported format. Replace it with an embedded JPG or PNG in your Word editor.");
       const bytes = Uint8Array.from(atob(match[2].replace(/\s/g,"")), c => c.charCodeAt(0));
       const image = match[1] === "png" ? await pdf.embedPng(bytes) : await pdf.embedJpg(bytes);
       const scale = Math.min(1, maxWidth / image.width, 400 / image.height);
@@ -72,7 +72,7 @@ export async function structuredDocxPdf(html) {
       for (const node of row.cells) {
         while (occupied[r][column]) column++;
         const colspan = Math.max(1, node.colSpan), rowspan = Math.max(1, Math.min(node.rowSpan, rows.length - r));
-        if (column + colspan > 32) throw new Error("Tables with more than 32 columns must be converted online.");
+        if (column + colspan > 32) throw new Error("Tables with more than 32 columns are not supported. Split this table in your Word editor.");
         cells.push({ node, row: r, column, colspan, rowspan });
         for (let rr = r; rr < r + rowspan; rr++) { occupied[rr] ||= []; for (let cc = column; cc < column + colspan; cc++) occupied[rr][cc] = true; }
         column += colspan;
@@ -92,7 +92,7 @@ export async function structuredDocxPdf(html) {
       let end = r + 1;
       for (let rr = r; rr < end; rr++) for (const cell of cells.filter(x => x.row === rr)) end = Math.max(end, rr + cell.rowspan);
       const height = heights.slice(r,end).reduce((a,b) => a + b,0);
-      if (height > PageSizes.A4[1] - margin * 2) throw new Error("A table row is taller than one page. Shorten it or use online Word-to-PDF conversion.");
+      if (height > PageSizes.A4[1] - margin * 2) throw new Error("A table row is taller than one page. Shorten the row in your Word editor.");
       if (y - height < margin) nextPage();
       for (const cell of cells.filter(x => x.row >= r && x.row < end)) {
         const top = y - heights.slice(r,cell.row).reduce((a,b) => a + b,0), h = heights.slice(cell.row,cell.row+cell.rowspan).reduce((a,b) => a + b,0), x = margin + unit * cell.column;
@@ -105,9 +105,20 @@ export async function structuredDocxPdf(html) {
     y -= 10;
   }
   async function paragraph(node) {
-    const text = inlineText(node).trim();
-    if (text) {
-      for (const line of lines(text,usable)) { if (y - lineHeight < margin) nextPage(); if (line) page.drawText(line,{x:margin,y:y-fontSize,font,size:fontSize}); y -= lineHeight; }
+    const text = inlineText(node).replace(/^[ \t\n]+|[ \t\n]+$/g, "");
+    const heading = Number(/^H([1-6])$/.exec(node.nodeName)?.[1] || 0);
+    const size = heading ? Math.max(11, 23 - heading * 3) : fontSize, height = size * 1.4;
+    const parts = text.split("\f");
+    for (let index = 0; index < parts.length; index++) {
+      if (index) nextPage();
+      if (!parts[index]) continue;
+      for (const line of lines(parts[index], usable, size)) {
+        if (y - height < margin) nextPage();
+        const width = font.widthOfTextAtSize(line, size);
+        const x = node.classList.contains("uh-center") ? margin + (usable - width) / 2 : node.classList.contains("uh-right") ? pageWidth - margin - width : margin;
+        if (line) page.drawText(line, { x, y: y - size, font, size });
+        y -= height;
+      }
       y -= 5;
     }
     for (const item of await images(node, usable)) { if (y-item.height-padding<margin) nextPage(); drawImages([item],margin,y); y -= item.height+padding; }

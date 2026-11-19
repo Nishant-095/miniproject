@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import sendAction from "../services/server.js";
 import { useToast } from "../context/ToastContext.jsx";
 import { downloadFile } from "../utils/download.js";
+import { fileProcessing } from "../services/pwa.js";
 export default function useFileTool(onDownload) {
   // Manages processing, downloading, and form cleanup.
   const [busy, setBusy] = useState(false);
@@ -36,30 +36,17 @@ export default function useFileTool(onDownload) {
     }
   }
   async function processFile(action, payload, filename) {
-    // Sends a file action and stores its result.
+    // File contents stay in this browser, whether connected or offline.
     if (request.current) return;
     const controller = new AbortController();
     request.current = controller;
     reset();
     setBusy(true);
+    fileProcessing(true);
     try {
-      let response;
-      if (navigator.onLine === false) {
-        const { processOfflineFile } = await import("../services/offlineFiles.js");
-        response = await processOfflineFile(action, payload, { signal: controller.signal });
-      } else {
-        try {
-          response = await sendAction(action, payload, {
-            responseType: "blob",
-            timeout: action === "convertDocument" ? 300000 : 150000,
-            signal: controller.signal,
-          });
-        } catch (error) {
-          if (!(error instanceof TypeError) || controller.signal.aborted) throw error;
-          const { processOfflineFile } = await import("../services/offlineFiles.js");
-          response = await processOfflineFile(action, payload, { signal: controller.signal });
-        }
-      }
+      const { processLocalFile } = await import("../services/offlineFiles.js");
+      const response = await processLocalFile(action, payload, { signal: controller.signal });
+      if (controller.signal.aborted) return;
       const { data, headers } = response;
       const original = Number(headers["x-original-size"]);
       const compressed = Number(headers["x-compressed-size"]);
@@ -85,6 +72,7 @@ export default function useFileTool(onDownload) {
         err.message || "Could not process this file. Please try again.";
       setError(message);
     } finally {
+      fileProcessing(false);
       if (!controller.signal.aborted) setBusy(false);
       request.current = null;
     }

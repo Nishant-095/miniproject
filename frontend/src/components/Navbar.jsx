@@ -5,6 +5,7 @@ import { useTheme } from "../context/ThemeContext.jsx";
 import Brand from "./Brand.jsx";
 import NotificationBell from "./NotificationBell.jsx";
 import InstallAppButton from "./InstallAppButton.jsx";
+import AppUpdateButton from "./AppUpdateButton.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useToast } from "../context/ToastContext.jsx";
 export default function Navbar() {
@@ -39,6 +40,7 @@ export default function Navbar() {
       <nav className="navbar shell" aria-label="Main navigation">
         <Brand />
         <div className="nav-utilities">
+          <AppUpdateButton compact />
           <InstallAppButton />
           <button
             className="theme-button"

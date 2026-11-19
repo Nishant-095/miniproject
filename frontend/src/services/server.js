@@ -3,9 +3,12 @@ const serverUrl = (
   import.meta.env?.VITE_SERVER_URL || "http://localhost:5000"
 ).replace(/\/$/, "");
 
-// One ordinary POST request: name the action and send its fields or files.
+// Account actions send JSON; file actions stay in this browser.
 async function onlineAction(action, fields = {}, options = {}) {
   // Sends one named action to Express.
+  if (fields instanceof FormData || fields instanceof Blob) {
+    throw new Error("Files are processed on your device and cannot be sent to the server.");
+  }
   const controller = new AbortController();
   const cancel = () =>
     // Cancels the current server request.
@@ -25,14 +28,13 @@ async function onlineAction(action, fields = {}, options = {}) {
     const headers = {};
     const token = localStorage.getItem(TOKEN_KEY);
     if (token) headers.Authorization = `Bearer ${token}`;
-    const isFile = fields instanceof FormData;
-    if (!isFile) headers["Content-Type"] = "application/json";
+    headers["Content-Type"] = "application/json";
     const response = await fetch(
       `${serverUrl}/server?action=${encodeURIComponent(action)}`,
       {
         method: "POST",
         headers,
-        body: isFile ? fields : JSON.stringify(fields),
+        body: JSON.stringify(fields),
         signal: controller.signal,
       },
     );
@@ -61,7 +63,7 @@ async function onlineAction(action, fields = {}, options = {}) {
   } catch (error) {
     if (timedOut)
       throw new Error(
-        "The server took too long. Try again or use a smaller file.",
+        "The account server took too long. Please try again.",
       );
     throw error;
   } finally {
@@ -105,6 +107,13 @@ if (typeof window !== "undefined") {
 }
 export default async function sendAction(action, fields = {}, options = {}) {
   if (options.signal?.aborted) throw new DOMException("Request cancelled", "AbortError");
+  if (fileActions.has(action)) {
+    const { processLocalFile } = await import("./offlineFiles.js");
+    return processLocalFile(action, fields, options);
+  }
+  if (fields instanceof FormData || fields instanceof Blob) {
+    throw new Error("Files are processed on your device and cannot be sent to the server.");
+  }
   if (navigator.onLine === false && !publicActions.has(action) && !fileActions.has(action)) {
     const { offlineAction } = await import("./offlineWorkspace.js");
     return offlineAction(action, fields);

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Image } from "lucide-react";
 import ImageTools from "../components/tools/ImageTools.jsx";
 import usePageTitle from "../hooks/usePageTitle.js";
+import FilePrivacy from "../components/FilePrivacy.jsx";
 export default function ImageCompressor() {
   // Displays the image compression page.
   usePageTitle("Image compressor");
@@ -20,6 +21,7 @@ export default function ImageCompressor() {
           <p>Resize images and make files smaller.</p>
         </div>
       </div>
+      <FilePrivacy />
       <div className="image-body">
         <ImageTools />
       </div>

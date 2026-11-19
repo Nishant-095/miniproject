@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import sendAction from "../services/server.js";
 import { downloadFile } from "../utils/download.js";
+import { PDFDocument } from "pdf-lib";
 
 function browser(t) {
   const old = new Map(
@@ -48,22 +49,21 @@ test("React sends a named POST action with fields and the account token", async 
     true,
   );
 });
-test("file actions preserve multipart boundaries, binary results, and size headers", async (t) => {
+test("file actions run locally while connected and never call the backend", async (t) => {
   browser(t);
+  const pdf = await PDFDocument.create(); pdf.addPage();
   const form = new FormData();
-  form.set("file", new Blob(["%PDF-test"]), "test.pdf");
-  t.mock.method(globalThis, "fetch", async (_url, options) => {
-    assert.equal(options.body, form);
-    assert.equal(options.headers["Content-Type"], undefined);
-    return new Response("converted file", {
-      headers: { "X-Output-Size": "14" },
-    });
-  });
-  const result = await sendAction("compressPdf", form, {
-    responseType: "blob",
-  });
-  assert.equal(await result.data.text(), "converted file");
-  assert.equal(result.headers["x-output-size"], "14");
+  const bytes = await pdf.save();
+  form.set("file", new Blob([bytes]), "test.pdf"); form.set("ranges", "1");
+  t.mock.method(globalThis, "fetch", () => { assert.fail("File data must never use fetch."); });
+  const result = await sendAction("splitPdf", form);
+  assert.equal((await PDFDocument.load(await result.data.arrayBuffer())).getPageCount(), 1);
+  assert.deepEqual(new Uint8Array(await form.get("file").arrayBuffer()), bytes, "The original selected file is unchanged.");
+});
+test("accidental multipart data in account actions is blocked before any request", async (t) => {
+  browser(t);
+  t.mock.method(globalThis, "fetch", () => { assert.fail("Multipart data must not leave the device."); });
+  await assert.rejects(sendAction("updateTask", new FormData()), /cannot be sent to the server/);
 });
 test("file errors retain server messages, and only expired private actions sign out", async (t) => {
   const events = browser(t);

@@ -5,7 +5,7 @@ import FilePicker from "../components/FilePicker.jsx";
 import FileResult from "../components/FileResult.jsx";
 import useFileTool from "../hooks/useFileTool.js";
 import usePageTitle from "../hooks/usePageTitle.js";
-import useProgramStatus from "../hooks/useProgramStatus.js";
+import FilePrivacy from "../components/FilePrivacy.jsx";
 import { fileForm } from "../utils/files.js";
 const formats = [
   {
@@ -14,7 +14,7 @@ const formats = [
     extensions: ["docx"],
     output: "pdf",
     office: true,
-    help: "Turn a Word document into a PDF for sharing.",
+    help: "Convert Word text, tables and embedded JPG/PNG images on this device. UtilityHub's positioned Word exports keep their page layout; other complex Word layouts may vary.",
   },
   {
     id: "pdf-docx",
@@ -44,7 +44,6 @@ export default function DocumentConverter() {
   usePageTitle("Document converter");
   const [mode, setMode] = useState("docx-pdf");
   const [files, setFiles] = useState([]);
-  const status = useProgramStatus();
   const tool = useFileTool(() =>
     // Clears the selected upload files.
     setFiles([]),
@@ -81,6 +80,7 @@ export default function DocumentConverter() {
           Open PDF studio <ArrowRight size={16} />
         </Link>
       </div>
+      <FilePrivacy />
       <div className="document-workspace converter-workspace">
         <div className="document-main">
           <form className="file-form" onSubmit={submit} noValidate>
@@ -135,12 +135,6 @@ export default function DocumentConverter() {
                 disabled={tool.busy}
               />
               <p className="conversion-detail">{selected.help}</p>
-              {navigator.onLine !== false && selected.office && status?.libreoffice === false && (
-                <p className="dependency-note">
-                  Online Word-to-PDF conversion is currently unavailable.
-                  Offline Word conversion and the other conversions can still be used.
-                </p>
-              )}
               <button
                 type="submit"
                 className="button file-submit"
@@ -179,17 +173,17 @@ export default function DocumentConverter() {
           </div>
           <div className="document-privacy">
             <ShieldCheck size={23} />
-            <h3>A temporary stop.</h3>
+            <h3>Your files stay yours.</h3>
             <p>
               PDF structure is read directly, without slow OCR. Text, tables and
-              graphics keep their page positions. Offline conversions run on
-              this device; check unusual fonts and complex page layouts.
+              graphics keep their page positions. Every conversion runs on
+              this device, including in the installed app. Check unusual fonts and complex layouts.
             </p>
           </div>
         </aside>
       </div>
       <p className="document-limits">
-        80 MB maximum upload · UTF-8 text support · Word/PDF layout may vary ·
+        80 MB maximum file size · UTF-8 text support · Word/PDF layout may vary ·
         No OCR for scanned documents · Complex layouts may vary
       </p>
     </section>

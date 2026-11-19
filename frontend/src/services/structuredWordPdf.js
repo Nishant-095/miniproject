@@ -26,7 +26,7 @@ export async function structuredWordPdf(file) {
   const xml = parse(files["word/document.xml"]);
   const marker = files["docProps/core.xml"] && all(parse(files["docProps/core.xml"]), "keywords").some(node => node.textContent === "utilityhub-structured-pdf-v1");
   if (!marker) {
-    if (all(xml, "txbxContent").length) throw new Error("This Word file uses text boxes the offline converter cannot preserve. Convert it online.");
+    if (all(xml, "txbxContent").length) throw new Error("This Word file uses unsupported text boxes. Export it to PDF in your Word editor to keep its layout.");
     return null;
   }
   const sections = []; let children = [];
@@ -57,7 +57,7 @@ export async function structuredWordPdf(file) {
     const standard = fonts.get(name);
     try { standard.encodeText(value); return standard; }
     catch {
-      if ([...value].some(character => !unicodeChars.has(character.codePointAt(0)))) throw new Error("A Word character is unsupported by the offline PDF font. Convert this document online.");
+      if ([...value].some(character => !unicodeChars.has(character.codePointAt(0)))) throw new Error("A Word character is unsupported by the bundled PDF font. Try a supported font in your Word editor.");
       return unicode;
     }
   }
@@ -81,7 +81,7 @@ export async function structuredWordPdf(file) {
   }
   async function drawTable(table) {
     const position = first(table, "tblpPr"), grid = first(table, "tblGrid");
-    if (!position || !grid) throw new Error("This structured table has changed its positioning. Convert the edited document online.");
+    if (!position || !grid) throw new Error("This table has changed its positioning. Export the edited document to PDF in your Word editor to keep its layout.");
     const x = Number(attr(position, "tblpX")) / 20, top = Number(attr(position, "tblpY")) / 20;
     const widths = [...grid.children].map(column => Number(attr(column, "w")) / 20);
     const rows = [...table.children].filter(node => node.localName === "tr");
@@ -135,7 +135,7 @@ export async function structuredWordPdf(file) {
       if (child.localName === "tbl") await drawTable(child);
       else {
         const clone = child.cloneNode(true); all(clone, "drawing").forEach(node => node.remove());
-        if (content(clone).trim()) throw new Error("This edited Word file has text outside its structured boxes. Convert it online to preserve those edits.");
+        if (content(clone).trim()) throw new Error("This edited Word file has text outside its positioned boxes. Export it to PDF in your Word editor to preserve those edits.");
       }
     }
   }
