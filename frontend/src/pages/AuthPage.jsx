@@ -116,7 +116,7 @@ export default function AuthPage({ mode = "login" }) {
         </Link>
         <div className="auth-aside-content">
           <div className="auth-symbol">
-            u<span>.</span>
+            <img src="/favicon.svg" width="50" height="50" alt="" />
           </div>
           <h1>
             A little space.

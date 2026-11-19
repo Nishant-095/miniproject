@@ -213,11 +213,8 @@ export default function Tasks() {
       </Link>
       <div className="tasks-heading">
         <div>
-          <div className="eyebrow">A LITTLE MORE ORGANISED</div>
-          <h1>
-            Small steps. <span>Big days.</span>
-          </h1>
-          <p>Your plans, deadlines, and a gentle reminder when it’s time.</p>
+          <h1>Tasks & reminders</h1>
+          <p>Plan your day, track progress, and keep your deadlines close.</p>
         </div>
         <button
           className="button"
@@ -270,6 +267,13 @@ export default function Tasks() {
         </div>
       </div>
       <section className="task-board" aria-label="Your task list">
+        <div className="task-progress-summary">
+          <h2>Your progress</h2>
+          <div className="task-progress-line">
+            <progress aria-label="Completed tasks" value={data.counts.completed || 0} max={data.counts.all || 1} />
+            <span>{data.counts.completed ?? "—"} of {data.counts.all ?? "—"} done</span>
+          </div>
+        </div>
         <div className="task-toolbar">
           <div className="task-tabs" aria-label="Filter tasks">
             {filters.map(([value, label]) => (

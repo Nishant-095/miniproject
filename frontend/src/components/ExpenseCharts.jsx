@@ -12,10 +12,11 @@ import {
   YAxis,
 } from "recharts";
 import { ChartNoAxesColumn, ChartPie } from "lucide-react";
-import { categoryColors, money, monthName } from "../utils/expenses.js";
+import { categoryColors, money, monthName, weeklySpending } from "../utils/expenses.js";
 export default function ExpenseCharts({ summary }) {
   // Displays spending charts for the selected month.
-  const [view, setView] = useState("daily");
+  const [view, setView] = useState("weekly");
+  const weekly = weeklySpending(summary.daily).map((row) => ({ ...row, amount: row.totalPaise / 100 }));
   const daily = summary.daily.map((row) =>
     // Builds a value for each item.
     ({
@@ -38,13 +39,15 @@ export default function ExpenseCharts({ summary }) {
       amount: row.totalPaise / 100,
     }),
   );
+  const bars = view === "weekly" ? weekly : view === "daily" ? daily : monthly;
+  const peak = Math.max(0, ...bars.map((row) => row.amount));
   return (
     <div className="expense-charts">
       <section className="expense-chart-card" aria-label="Spending by category">
         <div className="expense-chart-heading">
           <div>
-            <h2>Where it went</h2>
-            <p>Spending by category · {monthName(summary.month)}</p>
+            <h2>Spending by category</h2>
+            <p>{monthName(summary.month)}</p>
           </div>
           <ChartPie size={18} />
         </div>
@@ -121,12 +124,10 @@ export default function ExpenseCharts({ summary }) {
         <div className="expense-chart-heading">
           <div>
             <h2>
-              {view === "daily"
-                ? "Your month, day by day"
-                : "The bigger picture"}
+              {view === "weekly" ? "Spending by week" : view === "daily" ? "Spending by day" : "Spending by month"}
             </h2>
             <p>
-              {view === "daily"
+              {view !== "monthly"
                 ? monthName(summary.month)
                 : `12 months ending ${monthName(summary.month)}`}
             </p>
@@ -134,6 +135,7 @@ export default function ExpenseCharts({ summary }) {
           <ChartNoAxesColumn size={18} />
         </div>
         <div className="expense-chart-tabs">
+          <button aria-pressed={view === "weekly"} onClick={() => setView("weekly")}>Weekly</button>
           <button
             aria-pressed={view === "daily"}
             onClick={() =>
@@ -159,7 +161,7 @@ export default function ExpenseCharts({ summary }) {
         >
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              data={view === "daily" ? daily : monthly}
+              data={bars}
               margin={{
                 top: 16,
                 right: 8,
@@ -214,7 +216,7 @@ export default function ExpenseCharts({ summary }) {
                 }
                 labelFormatter={(label, rows) =>
                   // Formats the selected date or month label.
-                  view === "monthly"
+                  view === "weekly" ? `${label} · ${monthName(summary.month)}` : view === "monthly"
                     ? rows?.[0]?.payload?.fullLabel || label
                     : `${label} ${monthName(summary.month)}`
                 }
@@ -224,21 +226,23 @@ export default function ExpenseCharts({ summary }) {
               />
               <Bar
                 dataKey="amount"
-                fill="#aaa0dd"
+                fill="var(--chart-bar)"
                 radius={[4, 4, 0, 0]}
-                maxBarSize={view === "daily" ? 16 : 24}
+                maxBarSize={view === "weekly" ? 110 : view === "daily" ? 16 : 28}
                 isAnimationActive={false}
-              />
+              >
+                {bars.map((row) => <Cell key={row.label} fill={row.amount === peak && peak > 0 ? "var(--brand)" : "var(--chart-bar)"} />)}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
         <p className="expense-chart-caption">
-          Amounts in INR. Days and months without expenses are shown as zero.
+          {view === "weekly" ? "Amounts in INR. Each week groups seven days from the start of the month." : "Amounts in INR. Days and months without expenses are shown as zero."}
         </p>
         <details className="expense-chart-data">
           <summary>View chart values as text</summary>
           <div>
-            {(view === "daily"
+            {(view === "weekly" ? weekly : view === "daily"
               ? summary.daily.map((row) =>
                   // Builds a value for each item.
                   ({

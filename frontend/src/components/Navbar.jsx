@@ -1,6 +1,6 @@
 import { startTransition, useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { ArrowUpRight, Menu, X, Sun, Moon } from "lucide-react";
+import { Menu, X, Sun, Moon } from "lucide-react";
 import { useTheme } from "../context/ThemeContext.jsx";
 import Brand from "./Brand.jsx";
 import NotificationBell from "./NotificationBell.jsx";
@@ -65,33 +65,15 @@ export default function Navbar() {
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
         <div id="main-menu" className={`nav-links ${open ? "nav-open" : ""}`}>
-          <Link
-            to="/#tools"
-            onClick={() =>
-              // Closes the navigation panel.
-              setOpen(false)
-            }
-          >
-            Explore tools
-          </Link>
-          {!user && (
-            <Link
-              to="/#how-it-works"
-              onClick={() =>
-                // Closes the navigation panel.
-                setOpen(false)
-              }
-            >
-              How it works
-            </Link>
-          )}
+          <NavLink to="/" end>Home</NavLink>
+          <NavLink to="/tools/pdf" className={location.pathname.startsWith("/tools/") ? "active" : ""}>Documents</NavLink>
+          <NavLink to="/tasks">Tasks</NavLink>
+          <NavLink to="/expenses">Expenses</NavLink>
           {loading ? (
             <span className="muted text-sm">Checking session…</span>
           ) : user ? (
             <>
-              <NavLink to="/dashboard">My dashboard</NavLink>
-              <NavLink to="/tasks">My tasks</NavLink>
-              <NavLink to="/expenses">Expenses</NavLink>
+              <NavLink to="/dashboard">Dashboard</NavLink>
               <NavLink to="/notes">Notes</NavLink>
               <button
                 className="button button-outline button-small"
@@ -104,7 +86,7 @@ export default function Navbar() {
             <>
               <NavLink to="/login">Sign in</NavLink>
               <Link to="/register" className="button button-small">
-                Get started <ArrowUpRight size={16} />
+                Get started
               </Link>
             </>
           )}

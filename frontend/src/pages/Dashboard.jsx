@@ -112,12 +112,11 @@ export default function Dashboard() {
     <section className="dashboard-page shell">
       <div className="dashboard-heading">
         <div>
-          <div className="eyebrow">YOUR PERSONAL WORKSPACE</div>
           <h1>
             Hello, {user.name.split(" ")[0]}
             <span className="brand-accent">.</span>
           </h1>
-          <p>A home for your everyday. Let’s make it yours.</p>
+          <p>Your tasks, spending, and notes at a glance.</p>
         </div>
         <span className="today-date">
           <Clock3 size={16} />

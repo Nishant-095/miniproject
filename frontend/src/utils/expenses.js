@@ -16,15 +16,26 @@ export const paymentMethods = [
   ["other", "Other"],
 ];
 export const categoryColors = {
-  Food: "#a193db",
-  Transport: "#85afd1",
-  Shopping: "#d49bb7",
-  Bills: "#d3b77b",
-  Education: "#8fb9a2",
-  Health: "#d39b95",
-  Entertainment: "#99a0d4",
-  Other: "#b6a5bf",
+  Food: "#148f80",
+  Transport: "#6ba5c3",
+  Shopping: "#ce937c",
+  Bills: "#c8aa66",
+  Education: "#88b89c",
+  Health: "#c88883",
+  Entertainment: "#7c9aab",
+  Other: "#9eafa7",
 };
+
+// Weeks are consecutive seven-day groups within the selected month.
+export function weeklySpending(daily) {
+  const weeks = [];
+  for (const row of daily) {
+    const index = Math.floor((row.day - 1) / 7);
+    if (!weeks[index]) weeks[index] = { label: `Wk ${index + 1}`, totalPaise: 0 };
+    weeks[index].totalPaise += row.totalPaise;
+  }
+  return weeks;
+}
 export const money = (paise) =>
   // Formats stored paise as Indian rupees.
   new Intl.NumberFormat("en-IN", {

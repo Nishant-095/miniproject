@@ -4,6 +4,8 @@ A college mini project with six tools: **PDF tools, document converter, tasks an
 
 **Live website:** [utilityhub-phi.vercel.app](https://utilityhub-phi.vercel.app/) · **Backend health:** [utilityhub-api-rnnc.onrender.com/health](https://utilityhub-api-rnnc.onrender.com/health)
 
+Version 1.7 uses a teal and mint interface, with simple white cards, circular task controls and a completion bar, compact expense summaries, and weekly/daily/monthly spending charts. The same responsive layout supports light and dark mode on the website and installed PWA. Shared colors live in `frontend/src/styles.css` and `frontend/src/utilities.css`; the layout details are in `frontend/src/mint.css`.
+
 ## File privacy and the installed app
 
 In version 1.6, PDF tools, document conversion and image processing run **only in the browser**, online and offline. Selected files, extracted text and generated documents never go to Express. The server rejects every former file action and multipart request before body parsing. Files and generated results are not saved in the service-worker cache, IndexedDB or MongoDB. Download a result to keep it; original files are not edited.

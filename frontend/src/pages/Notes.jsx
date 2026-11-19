@@ -248,11 +248,8 @@ export default function Notes() {
     <section className="notes-page shell">
       <div className="notes-heading">
         <div>
-          <div className="eyebrow">YOUR PERSONAL SPACE</div>
-          <h1>
-            Keep a thought<span className="brand-accent">.</span>
-          </h1>
-          <p>Little lists, bright ideas, and things to come back to.</p>
+          <h1>Notes</h1>
+          <p>Quick thoughts, lists, and things to come back to.</p>
         </div>
         <button
           className="button"

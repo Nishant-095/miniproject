@@ -9,6 +9,7 @@ import {
   localToday,
   monthName,
   money,
+  weeklySpending,
 } from "../utils/expenses.js";
 
 test("decimal entry validation rejects hidden precision, scientific notation, negatives, and limits", () => {
@@ -53,4 +54,19 @@ test("export errors preserve the server explanation", async () => {
     "Use CSV for these characters.",
   );
   assert.match(await exportError({}), /Could not export/);
+});
+
+test("weekly spending keeps paise precise at week boundaries and month end", () => {
+  const daily = Array.from({ length: 31 }, (_, index) => ({ day: index + 1, totalPaise: 0 }));
+  for (const [day, value] of [[1, 1], [7, 99], [8, 200], [14, 3], [28, 400], [29, 500], [31, 6]]) daily[day - 1].totalPaise = value;
+  assert.deepEqual(weeklySpending(daily), [
+    { label: "Wk 1", totalPaise: 100 },
+    { label: "Wk 2", totalPaise: 203 },
+    { label: "Wk 3", totalPaise: 0 },
+    { label: "Wk 4", totalPaise: 400 },
+    { label: "Wk 5", totalPaise: 506 },
+  ]);
+  assert.equal(weeklySpending(daily).reduce((sum, row) => sum + row.totalPaise, 0), daily.reduce((sum, row) => sum + row.totalPaise, 0));
+  assert.equal(weeklySpending(daily.slice(0, 28)).length, 4);
+  assert.deepEqual(weeklySpending([]), []);
 });

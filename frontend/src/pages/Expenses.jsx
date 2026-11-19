@@ -9,7 +9,6 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleAlert,
-  Coins,
   Pencil,
   Plus,
   Receipt,
@@ -94,6 +93,8 @@ export default function Expenses() {
   const exportController = useRef(null);
   const selected = summary?.month === month ? summary : null;
   const visible = list.month === month ? list.expenses : [];
+  const topCategory = selected?.categories.reduce((top, row) =>
+    !top || row.totalPaise > top.totalPaise ? row : top, null);
   const refresh = () =>
     // Requests a fresh copy of saved records.
     setRevision(
@@ -238,11 +239,8 @@ export default function Expenses() {
       </Link>
       <div className="expenses-heading">
         <div>
-          <div className="eyebrow">MONEY, MADE SIMPLE</div>
-          <h1>
-            Little spends. <span>Clear plans.</span>
-          </h1>
-          <p>A place for every expense. A little more peace of mind.</p>
+          <h1>Expenses</h1>
+          <p>Log your spending and keep your monthly budget in view.</p>
         </div>
         <div className="expense-heading-actions">
           <label className="expense-month-picker">
@@ -291,7 +289,7 @@ export default function Expenses() {
           <span className="stat-icon purple">
             <Wallet size={21} />
           </span>
-          <small>Total spent</small>
+          <small>Spent this month</small>
           <b>{selected ? money(selected.totalPaise) : "—"}</b>
           <p>
             {selected
@@ -299,43 +297,33 @@ export default function Expenses() {
               : "Loading this month…"}
           </p>
         </article>
-        <article>
-          <span className="stat-icon orange">
-            <Coins size={21} />
-          </span>
-          <small>Overall budget</small>
-          <b>
-            {selected
-              ? selected.budget.overallPaise === null
-                ? "Not set"
-                : money(selected.budget.overallPaise)
-              : "—"}
-          </b>
-          <p>
-            {selected?.budget.overallPaise === null
-              ? "Give your month a plan"
-              : "Your limit for this month"}
-          </p>
-        </article>
         <article
-          className={selected?.remainingPaise < 0 ? "expense-negative" : ""}
+          className={`expense-remaining ${selected?.remainingPaise < 0 ? "expense-negative" : ""}`}
         >
           <span className="stat-icon green">
             <Receipt size={21} />
           </span>
-          <small>Remaining budget</small>
+          <small>Budget left</small>
           <b>
             {selected?.remainingPaise === null || !selected
               ? "—"
               : money(selected.remainingPaise)}
           </b>
           <p>
-            {selected?.remainingPaise < 0
+            {!selected
+              ? "Loading your budget…"
+              : selected.remainingPaise < 0
               ? "Over the monthly limit"
-              : selected?.remainingPaise === null
+              : selected.remainingPaise === null
                 ? "Set a budget to see what’s left"
-                : "Available within your plan"}
+                : `of ${money(selected?.budget.overallPaise || 0)} monthly budget`}
           </p>
+        </article>
+        <article>
+          <span className="stat-icon orange"><Receipt size={21} /></span>
+          <small>Top category</small>
+          <b>{selected ? topCategory?.category || "No expenses yet" : "—"}</b>
+          <p>{topCategory ? `${money(topCategory.totalPaise)} this month` : "Your most used category appears here"}</p>
         </article>
       </div>
       {selected?.alerts.length > 0 && (
@@ -390,7 +378,7 @@ export default function Expenses() {
       <section className="expense-budget-panel">
         <div className="expense-section-heading">
           <div>
-            <h2>A plan you can keep an eye on</h2>
+            <h2>Monthly budgets</h2>
             <p>Monthly and category budgets · {monthName(month)}</p>
           </div>
           <button
@@ -421,15 +409,13 @@ export default function Expenses() {
         )}
         <p className="expense-budget-note">
           <BellRing size={13} />
-          Email alerts use the same SMTP settings as your task reminders. Amber
-          at 80%; red above 100%. Checks run every minute while the backend is
-          running.
+          Budget alerts appear at 80% and when you go over your limit. Email reminders need an internet connection and a configured email service.
         </p>
       </section>
       <section className="expense-transactions" aria-label="Monthly expenses">
         <div className="expense-section-heading">
           <div>
-            <h2>The little details</h2>
+            <h2>Recent expenses</h2>
             <p>
               {monthName(month)} · {selected?.count ?? "—"} expenses
             </p>
