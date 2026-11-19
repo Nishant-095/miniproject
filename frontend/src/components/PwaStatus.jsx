@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Download, RefreshCw, WifiOff, X } from "lucide-react";
 import { getPwaState, subscribePwa, applyPwaUpdate } from "../services/pwa.js";
 export default function PwaStatus() {
@@ -7,12 +7,21 @@ export default function PwaStatus() {
   const [dismissed, setDismissed] = useState(false),
     [later, setLater] = useState(false),
     [updating, setUpdating] = useState(false);
+  const [footerVisible, setFooterVisible] = useState(false);
+  useEffect(() => {
+    // Put the status below a visible footer so it cannot cover update controls.
+    const footer = document.querySelector(".footer");
+    if (!footer || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => setFooterVisible(entry.isIntersecting));
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
   const update = state.updateAvailable && !later;
   if (state.online && !state.syncPending && !state.syncError && !update && ((!state.ready && !state.error) || dismissed))
     return null;
   return (
     <aside
-      className={`pwa-status ${!state.online ? "pwa-offline" : ""}`}
+      className={`pwa-status ${!state.online ? "pwa-offline" : ""} ${footerVisible ? "pwa-in-footer" : ""}`}
       aria-label="App status"
     >
       <div role="status">

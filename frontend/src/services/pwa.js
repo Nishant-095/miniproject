@@ -47,13 +47,22 @@ export function fileProcessing(active) {
 }
 
 export async function checkForPwaUpdate({ force = false } = {}) {
-  if (!registration || navigator.onLine === false) return false;
+  if (navigator.onLine === false) {
+    change({ online: false, checkMessage: "You’re offline. Reconnect to check for updates." });
+    return false;
+  }
   if (updateCheck) return updateCheck;
   if (!force && Date.now() - lastCheck < 60000) return false;
   lastCheck = Date.now();
   change({ checking: true, checkMessage: "" });
   updateCheck = (async () => {
     try {
+      // Recover an existing worker even if the registration callback is delayed.
+      registration ||= await navigator.serviceWorker?.getRegistration?.();
+      if (!registration) {
+        change({ checkMessage: "Offline setup is not ready. Reload while connected and try again." });
+        return false;
+      }
       await registration.update();
       if (registration.waiting && navigator.serviceWorker.controller) change({ updateAvailable: true });
       change({ checkMessage: state.updateAvailable ? "An update is ready." : registration.installing ? "Downloading the latest app. Keep this window open." : "You have the latest available app." });

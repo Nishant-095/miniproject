@@ -111,6 +111,12 @@
 .pwa-offline {
   border-color: #d2b77e;
 }
+.pwa-status.pwa-in-footer {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  margin: 18px 18px 18px auto;
+}
 .footer-links {
   flex-wrap: wrap;
 }

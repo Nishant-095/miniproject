@@ -38,8 +38,8 @@ export default function AppUpdateButton({ compact = false }) {
   }
   async function click() {
     if (state.updateAvailable) return setConfirming(true);
-    const checked = await checkForPwaUpdate({ force: true });
-    notify(checked ? getPwaState().checkMessage : "Connect to the internet to check for updates.");
+    await checkForPwaUpdate({ force: true });
+    notify(getPwaState().checkMessage || "Connect to the internet to check for updates.");
   }
   return <>
     <button className={compact ? "install-app-button app-update-button" : "app-update-link"} disabled={state.checking || updating || !state.online} onClick={click}>

@@ -160,6 +160,21 @@ test("an update cannot interrupt a running local file conversion", async () => {
     assert.equal(applied, 1);
   } finally { env.restore(); }
 });
+test("manual checks recover an existing worker before its callback arrives", async () => {
+  const env = globals();
+  try {
+    const pwa = await manager();
+    let checks = 0;
+    env.navigator.serviceWorker.controller = {};
+    env.navigator.serviceWorker.getRegistration = async () => ({
+      waiting: {}, update: async () => { checks++; },
+    });
+    await pwa.registerPwa({ production: true, registerWorker: () => async () => {} });
+    assert.equal(await pwa.checkForPwaUpdate({ force: true }), true);
+    assert.equal(checks, 1);
+    assert.equal(pwa.getPwaState().updateAvailable, true);
+  } finally { env.restore(); }
+});
 test("development and insecure contexts do not register a PWA worker", async () => {
   const env = globals();
   try {
